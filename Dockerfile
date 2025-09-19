@@ -24,4 +24,4 @@ COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 WORKDIR /var/www/html
 
 # Démarrage : PHP-FPM + Nginx dans le même conteneur
-CMD service nginx start && php-fpm
+CMD composer update && service nginx start && php-fpm

@@ -50,7 +50,6 @@ class UserController extends AbstractController
     public function create(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-
         $user = new User();
         $user->setFullname($data['fullname'] ?? '');
         $user->setStudyLevel($data['study_level'] ?? '');

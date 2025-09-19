@@ -22,6 +22,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 WORKDIR /var/www/html
-
 # Démarrage : PHP-FPM + Nginx dans le même conteneur
-CMD composer update && service nginx start && php-fpm
+CMD mkdir -p /var/www/html/var/logs/crud && \
+    composer update && \
+    service nginx start && \
+    php-fpm

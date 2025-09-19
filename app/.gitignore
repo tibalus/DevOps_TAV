@@ -1,9 +1,6 @@
 # Symfony & PHP
 /vendor/
 /var/
-/.env
-/.env.local
-/.env.*.local
 /.phpunit.result.cache
 /.idea/
 /nbproject/

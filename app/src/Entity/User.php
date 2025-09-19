@@ -17,7 +17,6 @@ class User
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
-
     #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank]
     private string $fullname;

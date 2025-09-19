@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Student;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,7 +28,7 @@ class UserController extends AbstractController
     #[Route('', name: 'user_list', methods: ['GET'])]
     public function list(): JsonResponse
     {
-        $users = $this->em->getRepository(Student::class)->findAll();
+        $users = $this->em->getRepository(User::class)->findAll();
         $data = $this->serializer->serialize($users, 'json');
         return new JsonResponse($data, Response::HTTP_OK, [], true);
     }
@@ -37,7 +37,7 @@ class UserController extends AbstractController
     #[Route('/{id}', name: 'user_get', methods: ['GET'])]
     public function get(string $id): JsonResponse
     {
-        $user = $this->em->getRepository(Student::class)->find($id);
+        $user = $this->em->getRepository(User::class)->find($id);
         if (!$user) {
             return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
@@ -51,7 +51,7 @@ class UserController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $user = new Student();
+        $user = new User();
         $user->setFullname($data['fullname'] ?? '');
         $user->setStudyLevel($data['study_level'] ?? '');
         $user->setAge((int)($data['age'] ?? 0));
@@ -67,7 +67,7 @@ class UserController extends AbstractController
     #[Route('/{id}', name: 'user_update', methods: ['PUT'])]
     public function update(string $id, Request $request): JsonResponse
     {
-        $user = $this->em->getRepository(Student::class)->find($id);
+        $user = $this->em->getRepository(User::class)->find($id);
         if (!$user) {
             return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
@@ -87,7 +87,7 @@ class UserController extends AbstractController
     #[Route('/{id}', name: 'user_delete', methods: ['DELETE'])]
     public function delete(string $id): JsonResponse
     {
-        $user = $this->em->getRepository(Student::class)->find($id);
+        $user = $this->em->getRepository(User::class)->find($id);
         if (!$user) {
             return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
         }

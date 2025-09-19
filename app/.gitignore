@@ -1,0 +1,42 @@
+# Symfony & PHP
+/vendor/
+/var/
+/.env
+/.env.local
+/.env.*.local
+/.phpunit.result.cache
+/.idea/
+/nbproject/
+/.vscode/
+*.log
+*.cache
+
+# Composer
+composer.lock
+
+# Node / Assets
+/node_modules/
+/public/build/
+/public/bundles/
+/yarn-error.log
+/package-lock.json
+/.npm
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE / Editors
+*.swp
+*~
+.idea/
+.vscode/
+
+# Symfony specific
+/public/uploads
+/public/media
+/public/files
+
+# Docker
+docker-compose.override.yml
+.env.docker

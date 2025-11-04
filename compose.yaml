@@ -27,6 +27,9 @@ services:
       - app-network
   fluentbit:
     image: fluent/fluent-bit:4.0.13
+    environment:
+      LOKI_URL: 104.155.107.5
+      LOKI_PORT : 3100
     container_name : fluentbit
     restart : unless-stopped
     volumes:

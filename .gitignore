@@ -1,3 +1,4 @@
 /.idea
 /.vscode
 spec.yml
+fluent-bit.conf

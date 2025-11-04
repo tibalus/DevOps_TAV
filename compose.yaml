@@ -30,7 +30,7 @@ services:
     container_name : fluentbit
     restart : unless-stopped
     volumes:
-      - ./app/var/logs:/var/log/symfony:ro
+      - ./app/var/logs/crud:/var/log/symfony:ro
       - ./app/fluentbit:/var/log/fluentbit
       - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
 

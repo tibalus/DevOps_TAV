@@ -25,6 +25,15 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - app-network
+  fluentbit:
+    image: fluent/fluent-bit:4.0.13
+    container_name : fluentbit
+    restart : unless-stopped
+    volumes:
+      - ./app/var/logs:/var/log/symfony:ro
+      - ./app/fluentbit:/var/log/fluentbit
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+
 
 volumes:
   db_data:

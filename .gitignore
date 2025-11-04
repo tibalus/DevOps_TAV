@@ -2,3 +2,4 @@
 /.vscode
 spec.yml
 fluent-bit.conf
+compose.yaml

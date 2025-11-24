@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.2-fpm as build
 
 # Installer dépendances, nginx et outils utiles
 RUN apt-get update && apt-get install -y \
@@ -27,3 +27,4 @@ CMD mkdir -p /var/www/html/var/logs/crud && \
     composer update && \
     service nginx start && \
     php-fpm
+

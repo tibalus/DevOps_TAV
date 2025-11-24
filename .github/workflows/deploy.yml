@@ -1,0 +1,23 @@
+name: CI/CD Pipeline - Deploy to Cloud Run
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Déclenche sur les tags version (ex: v1.0.0)
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Récupération du code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Extraction de la version depuis le tag
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Version détectée: $VERSION"

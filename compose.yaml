@@ -30,13 +30,13 @@ services:
     environment:
       LOKI_URL: 104.155.107.5
       LOKI_PORT : 3100
+      LOG_NAME: sender=crud_app
     container_name : fluentbit
     restart : unless-stopped
     volumes:
       - ./app/var/logs/crud:/var/log/symfony:ro
       - ./app/fluentbit:/var/log/fluentbit
       - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
-
 
 volumes:
   db_data:

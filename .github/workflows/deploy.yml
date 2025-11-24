@@ -31,6 +31,15 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "Deploying version: $VERSION"
 
+      - name: Debug secrets
+        run: |
+          if [ -z "${{ secrets.TR_DOCKER_TOKEN }}" ]; then
+            echo "❌ TR_DOCKER_TOKEN is empty!"
+          else
+            echo "✅ TR_DOCKER_TOKEN exists"
+          fi
+
+
       # 3. Connexion à Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v3

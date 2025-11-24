@@ -7,7 +7,7 @@ on:
 
 env:
   TR_DOCKER_USERNAME: ${{ secrets.TR_DOCKER_USERNAME }}
-  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_PROJECT_ID: ${{ secrets.TR_GCP_PROJECT_ID }}
   GCP_REGION: ${{ secrets.GCP_REGION }}
   DB_INSTANCE: ${{ secrets.DB_INSTANCE }}
   DB_NAME: ${{ secrets.DB_NAME }}

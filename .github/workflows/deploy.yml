@@ -46,3 +46,11 @@ jobs:
         with:
           username: ${{ secrets.VD_DOCKER_USERNAME }}
           password: ${{ secrets.VD_DOCKER_TOKEN }}
+
+      # 4. Build et push de l'image de l'API
+      - name: Build and push API image
+        run: |
+          docker build -f ./Dockerfile -t ${{ secrets.VD_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }} .
+          docker tag ${{ secrets.VD_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }} ${{ secrets.VD_DOCKER_USERNAME }}/symfony-crud-api:latest
+          docker push ${{ secrets.VD_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }}
+          docker push ${{ secrets.VD_DOCKER_USERNAME }}/symfony-crud-api:latest

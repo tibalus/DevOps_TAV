@@ -55,18 +55,13 @@ jobs:
           docker push ${{ env.TR_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }}
           docker push ${{ env.TR_DOCKER_USERNAME }}/symfony-crud-api:latest 
 
-      # 5. Build et push de l'image Fluent Bit
-      - name: Build and push Fluent Bit image
-        run: |
-          docker build -f docker/Dockerfile.fluent-bit -t ${{ env.TR_DOCKER_USERNAME }}/fluent-bit:latest ./fluent-bit
-          docker push ${{ env.TR_DOCKER_USERNAME }}/fluent-bit:latest
 
       # 6. Configuration du SDK Google Cloud
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.TR_GCP_SA_KEY }}
+          project_id: ${{ secrets.TR_GCP_PROJECT_ID }}
           export_default_credentials: true
 
       # 7. Exécution des migrations de base de données

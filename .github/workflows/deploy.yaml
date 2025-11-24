@@ -6,7 +6,7 @@ on:
       - 'v*.*.*'
 
 env:
-  TR_DOCKER_USERNAME: ${{ secrets.TR_DOCKER_USERNAME }}
+  AG_DOCKER_USERNAME: ${{ secrets.AG_DOCKER_USERNAME }}
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GCP_REGION: ${{ secrets.GCP_REGION }}
   DB_INSTANCE: ${{ secrets.DB_INSTANCE }}
@@ -35,22 +35,22 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.TR_DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.AG_DOCKER_USERNAME }}
+          password: ${{ secrets.AG_DOCKERHUB_TOKEN }}
 
       # 4. Build et push de l'image de l'API
       - name: Build and push API image
         run: |
-          docker build -f docker/Dockerfile -t ${{ env.TR_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }} .
-          docker tag ${{ env.TR_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }} ${{ env.TR_DOCKER_USERNAME }}/symfony-crud-api:latest
-          docker push ${{ env.TR_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }}
-          docker push ${{ env.TR_DOCKER_USERNAME }}/symfony-crud-api:latest
+          docker build -f docker/Dockerfile -t ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }} .
+          docker tag ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }} ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:latest
+          docker push ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }}
+          docker push ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:latest
 
       # 5. Build et push de l'image Fluent Bit
       - name: Build and push Fluent Bit image
         run: |
-          docker build -f docker/Dockerfile.fluent-bit -t ${{ env.TR_DOCKER_USERNAME }}/fluent-bit:latest ./fluent-bit
-          docker push ${{ env.TR_DOCKER_USERNAME }}/fluent-bit:latest
+          docker build -f docker/Dockerfile.fluent-bit -t ${{ env.AG_DOCKER_USERNAME }}/fluent-bit:latest ./fluent-bit
+          docker push ${{ env.AG_DOCKER_USERNAME }}/fluent-bit:latest
 
       # 6. Configuration du SDK Google Cloud
       - name: Setup Google Cloud SDK
@@ -77,7 +77,7 @@ jobs:
       - name: Update Cloud Run configuration
         run: |
           sed -i "s/\${VERSION}/${{ steps.version.outputs.VERSION }}/g" cloud-run-service.yaml
-          sed -i "s/\${TR_DOCKER_USERNAME}/${{ env.TR_DOCKER_USERNAME }}/g" cloud-run-service.yaml
+          sed -i "s/\${AG_DOCKER_USERNAME}/${{ env.AG_DOCKER_USERNAME }}/g" cloud-run-service.yaml
           sed -i "s/\${GCP_PROJECT_ID}/${{ env.GCP_PROJECT_ID }}/g" cloud-run-service.yaml
           sed -i "s/\${GCP_REGION}/${{ env.GCP_REGION }}/g" cloud-run-service.yaml
           sed -i "s/\${DB_INSTANCE}/${{ env.DB_INSTANCE }}/g" cloud-run-service.yaml

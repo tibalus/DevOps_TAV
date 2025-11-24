@@ -47,7 +47,7 @@ jobs:
           username: ${{ secrets.TR_DOCKER_USERNAME }}
           password: ${{ secrets.TR_DOCKER_TOKEN }}
 
-      # 4. Build et push de l'image de l'API
+      # 4. Build et push de l'image de l'API coucou
       - name: Build and push API image
         run: |
           docker build -f ./Dockerfile -t ${{ env.TR_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }} .

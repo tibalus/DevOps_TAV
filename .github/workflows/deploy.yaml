@@ -41,7 +41,7 @@ jobs:
       # 4. Build et push de l'image de l'API
       - name: Build and push API image
         run: |
-          docker build -f /Dockerfile -t ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }} .
+          docker build -f ./Dockerfile -t ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }} .
           docker tag ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }} ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:latest
           docker push ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }}
           docker push ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:latest

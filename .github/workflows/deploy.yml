@@ -19,6 +19,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      #0. Vérification de l'initialisation des variables (debug)
+      - name: Debug secrets
+        run: |
+          if [ -z "${{ secrets.VD_DOCKER_TOKEN }}" ]; then
+          echo "VD_DOCKER_TOKEN is empty!"
+          else
+          echo "VD_DOCKER_TOKEN exists"
+          fi
+
       # 1. Récupération du code
       - name: Checkout code
         uses: actions/checkout@v4

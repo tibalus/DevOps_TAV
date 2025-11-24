@@ -46,6 +46,12 @@ jobs:
           docker push ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:${{ steps.version.outputs.VERSION }}
           docker push ${{ env.AG_DOCKER_USERNAME }}/symfony-crud-api:latest
 
+      # 5. Initialisation de Gcloud Cli
+      - name: Initialize Google Cloud CLI
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.AG_GCP_SA_KEY }}
+
       # 6. Configuration du SDK Google Cloud
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2

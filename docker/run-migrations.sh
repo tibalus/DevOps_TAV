@@ -17,7 +17,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
 
 # Démarrer Cloud SQL Proxy en arrière-plan
 echo "Starting Cloud SQL Proxy..."
-cloud_sql_proxy -instances=${INSTANCE_CONNECTION_NAME}=tcp:3306 &
+cloud_sql_proxy -instances=${INSTANCE_NAME}=tcp:3306 &
 PROXY_PID=$!
 
 # Attendre que le proxy soit prêt
@@ -26,7 +26,7 @@ sleep 5
 
 # Vérifier la connexion à la base de données
 echo "Testing database connection..."
-until mysql -h 127.0.0.1 -P 3306 -u ${DB_USER} -p${DB_PASSWORD} -e "SELECT 1" > /dev/null 2>&1; do
+until mysql -h 127.0.0.1 -P 3306 -u ${AG_DB_USER} -p${AG_DB_PASSWORD} -e "SELECT 1" > /dev/null 2>&1; do
     echo "Waiting for database connection..."
     sleep 2
 done

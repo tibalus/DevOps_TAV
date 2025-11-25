@@ -3,7 +3,7 @@ set -e
 
 echo "Starting migration process..."
 
-# Décoder et sauvegarder la clé de service GCP
+# Sauvegarder la clé de service GCP (déjà en base64, on la décode)
 echo "$AG_GCP_SA_KEY" | base64 -d > /tmp/gcp-key.json
 export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
 

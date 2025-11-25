@@ -62,17 +62,20 @@ jobs:
 
       # 7. Exécution des migrations de base de données
       - name: Run database migrations
+        env:
+          GCP_SA_KEY: ${{ secrets.AG_GCP_SA_KEY }}
+          DB_PASS: ${{ secrets.DB_PASSWORD }}
         run: |
           # Build migration image
           docker build -f docker/Dockerfile.migrations -t migrations-runner .
           
           # Run migrations via Cloud SQL Proxy
           docker run --rm \
-            -e DATABASE_URL="mysql://${{ env.DB_USER }}:${{ secrets.DB_PASSWORD }}@127.0.0.1:3306/${{ env.DB_NAME }}" \
+            -e DATABASE_URL="mysql://${{ env.DB_USER }}:${DB_PASS}@127.0.0.1:3306/${{ env.DB_NAME }}" \
             -e INSTANCE_CONNECTION_NAME="${{ secrets.GCP_PROJECT_ID }}:${{ env.GCP_REGION }}:${{ env.DB_INSTANCE }}" \
-            -e AG_GCP_SA_KEY="${{ secrets.AG_GCP_SA_KEY }}" \
+            -e AG_GCP_SA_KEY="${GCP_SA_KEY}" \
             -e DB_USER="${{ env.DB_USER }}" \
-            -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+            -e DB_PASSWORD="${DB_PASS}" \
             migrations-runner
 
       # 8. Mise à jour du fichier de configuration Cloud Run

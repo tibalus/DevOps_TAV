@@ -59,25 +59,20 @@ jobs:
           project_id: ${{ secrets.AG_GCP_PROJECT_ID }}
           export_default_credentials: true
 
-      # 7. Exécution des migrations de base de données
-      - name: Run database migrations
-        env:
-          GCP_SA_KEY: ${{ secrets.AG_GCP_SA_KEY }}
-          DB_USER: ${{ secrets.AG_DB_USER }}
-          DB_PASS: ${{ secrets.AG_DB_PASSWORD }}
+      # 7. Mise en place de PHP
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      # 8. Migration
+      - name: Run migration
         run: |
-          # Build migration image
-          docker build -f docker/Dockerfile.migrations -t migrations-runner .
-          
-          # Run migrations via Cloud SQL Proxy
-          # Format de connexion: project:region:instance-name
-          docker run --rm \
-            -e DATABASE_URL="mysql://${DB_USER}:${DB_PASS}@127.0.0.1:3306/${{ env.DB_NAME }}" \
-            -e INSTANCE_NAME="devops-tav:europe-west1:mon-instance-mysql" \
-            -e AG_GCP_SA_KEY="${AG_GCP_SA_KEY}" \
-            -e AG_DB_USER="root" \
-            -e AG_DB_PASSWORD="root" \
-            migrations-runner
+          cd app
+          composer install -n
+          php bin/console make:migration --no-interaction
+          php bin/console doctrine:database:create --no-interaction
+          php bin/console doctrine:migration:migrate --no-interaction
 
       # 8. Mise à jour du fichier de configuration Cloud Run
       - name: Update Cloud Run configuration

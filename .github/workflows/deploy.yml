@@ -69,3 +69,16 @@ jobs:
           service_account_key: ${{ secrets.VD_GCP_SA_KEY }}
           project_id: ${{ secrets.VD_GCP_PROJECT_ID }}
           export_default_credentials: true
+
+      # 7. Mise en place de PHP
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      # 8. Migration
+      - name: Run migration
+        run: |
+          cd app
+          php bin/console doctrine:database:create --no-interaction
+          php bin/console doctrine:migration:migrate --no-interaction

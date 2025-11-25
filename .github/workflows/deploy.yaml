@@ -69,8 +69,10 @@ jobs:
           # Run migrations via Cloud SQL Proxy
           docker run --rm \
             -e DATABASE_URL="mysql://${{ env.DB_USER }}:${{ secrets.DB_PASSWORD }}@127.0.0.1:3306/${{ env.DB_NAME }}" \
-            -e INSTANCE_CONNECTION_NAME="${{ env.AG_GCP_PROJECT_ID }}:${{ env.GCP_REGION }}:${{ env.DB_INSTANCE }}" \
+            -e INSTANCE_CONNECTION_NAME="${{ secrets.GCP_PROJECT_ID }}:${{ env.GCP_REGION }}:${{ env.DB_INSTANCE }}" \
             -e AG_GCP_SA_KEY="${{ secrets.AG_GCP_SA_KEY }}" \
+            -e DB_USER="${{ env.DB_USER }}" \
+            -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
             migrations-runner
 
       # 8. Mise à jour du fichier de configuration Cloud Run

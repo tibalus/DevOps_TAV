@@ -1,0 +1,36 @@
+FROM php:8.2-cli
+
+# Installer les dépendances nécessaires
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    curl \
+    libonig-dev \
+    libzip-dev \
+    default-mysql-client \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installer extensions PHP nécessaires
+RUN docker-php-ext-install pdo pdo_mysql zip
+
+# Installer Composer
+RUN curl -sS https://getcomposer.org/installer | php -- \
+    --install-dir=/usr/local/bin --filename=composer
+
+# Installer Cloud SQL Proxy
+RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O /usr/local/bin/cloud_sql_proxy \
+    && chmod +x /usr/local/bin/cloud_sql_proxy
+
+# Copier les fichiers de l'application
+WORKDIR /app
+COPY app/ /app/
+
+# Installer les dépendances Composer
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Script d'entrée pour exécuter les migrations
+COPY docker/run-migrations.sh /usr/local/bin/run-migrations.sh
+RUN chmod +x /usr/local/bin/run-migrations.sh
+
+ENTRYPOINT ["/usr/local/bin/run-migrations.sh"]

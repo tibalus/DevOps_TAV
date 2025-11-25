@@ -80,8 +80,8 @@ jobs:
         run: |
           cd app
           composer install -n
-          php bin/console make:migration --no-interaction
           php bin/console doctrine:database:create --no-interaction
+          php bin/console make:migration --no-interaction
           php bin/console doctrine:migration:migrate --no-interaction
 
       # 9. Mise à jour du fichier de configuration Cloud Run

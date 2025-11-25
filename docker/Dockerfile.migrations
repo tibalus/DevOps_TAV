@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     default-mysql-client \
     wget \
+    python3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Installer extensions PHP nécessaires

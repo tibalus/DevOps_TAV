@@ -3,8 +3,16 @@ set -e
 
 echo "Starting migration process..."
 
-# Sauvegarder la clé de service GCP (déjà en base64, on la décode)
-echo "$AG_GCP_SA_KEY" | base64 -d > /tmp/gcp-key.json
+# Sauvegarder la clé de service GCP
+# Vérifier si c'est du base64 ou du JSON direct
+if echo "$AG_GCP_SA_KEY" | grep -q "^{"; then
+    # C'est du JSON direct
+    echo "$AG_GCP_SA_KEY" > /tmp/gcp-key.json
+else
+    # C'est du base64, on décode
+    echo "$AG_GCP_SA_KEY" | base64 -d > /tmp/gcp-key.json
+fi
+
 export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
 
 # Démarrer Cloud SQL Proxy en arrière-plan

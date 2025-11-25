@@ -24,10 +24,16 @@ RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O /usr/loca
 
 # Copier les fichiers de l'application
 WORKDIR /app
+COPY app/composer.json app/composer.lock* /app/
+
+# Installer les dépendances Composer (sans les scripts et sans dev)
+RUN composer install --no-scripts --no-autoloader --no-interaction
+
+# Copier le reste de l'application
 COPY app/ /app/
 
-# Installer les dépendances Composer
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Générer l'autoloader optimisé
+RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
 
 # Script d'entrée pour exécuter les migrations
 COPY docker/run-migrations.sh /usr/local/bin/run-migrations.sh

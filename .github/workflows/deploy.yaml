@@ -7,11 +7,10 @@ on:
 
 env:
   AG_DOCKER_USERNAME: ${{ secrets.AG_DOCKER_USERNAME }}
-  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_PROJECT_ID: ${{ secrets.AG_GCP_PROJECT_ID }}
   GCP_REGION: ${{ secrets.GCP_REGION }}
-  DB_INSTANCE: ${{ secrets.DB_INSTANCE }}
-  DB_NAME: ${{ secrets.DB_NAME }}
-  DB_USER: ${{ secrets.DB_USER }}
+  INSTANCE_NAME: ${{ secrets.INSTANCE_NAME }}
+  DB_NAME: ${{ secrets.AG_DB_NAME }}
   LOKI_URL: ${{ secrets.LOKI_URL }}
 
 jobs:
@@ -64,19 +63,19 @@ jobs:
       - name: Run database migrations
         env:
           GCP_SA_KEY: ${{ secrets.AG_GCP_SA_KEY }}
-          DB_PASS: ${{ secrets.DB_PASSWORD }}
+          DB_USER: ${{ secrets.AG_DB_USER }}
+          DB_PASS: ${{ secrets.AG_DB_PASSWORD }}
         run: |
           # Build migration image
           docker build -f docker/Dockerfile.migrations -t migrations-runner .
           
           # Run migrations via Cloud SQL Proxy
-          # Instance connection: devops-tav:europe-west1:mon-instance-mysql
           docker run --rm \
-            -e DATABASE_URL="mysql://${{ env.DB_USER }}:${DB_PASS}@127.0.0.1:3306/${{ env.DB_NAME }}" \
-            -e INSTANCE_CONNECTION_NAME="devops-tav:europe-west1:mon-instance-mysql" \
+            -e DATABASE_URL="mysql://${DB_USER}:${DB_PASS}@127.0.0.1:3306/${{ env.DB_NAME }}" \
+            -e INSTANCE_NAME="${{ env.INSTANCE_NAME }}" \
             -e AG_GCP_SA_KEY="${GCP_SA_KEY}" \
-            -e DB_USER="${{ env.DB_USER }}" \
-            -e DB_PASSWORD="${DB_PASS}" \
+            -e AG_DB_USER="${DB_USER}" \
+            -e AG_DB_PASSWORD="${DB_PASS}" \
             migrations-runner
 
       # 8. Mise à jour du fichier de configuration Cloud Run
@@ -84,11 +83,10 @@ jobs:
         run: |
           sed -i "s/\${VERSION}/${{ steps.version.outputs.VERSION }}/g" cloud-run-service.yaml
           sed -i "s/\${AG_DOCKER_USERNAME}/${{ env.AG_DOCKER_USERNAME }}/g" cloud-run-service.yaml
-          sed -i "s/\${AG_GCP_PROJECT_ID}/${{ env.AG_GCP_PROJECT_ID }}/g" cloud-run-service.yaml
+          sed -i "s/\${AG_GCP_PROJECT_ID}/${{ secrets.AG_GCP_PROJECT_ID }}/g" cloud-run-service.yaml
           sed -i "s/\${GCP_REGION}/${{ env.GCP_REGION }}/g" cloud-run-service.yaml
-          sed -i "s/\${DB_INSTANCE}/${{ env.DB_INSTANCE }}/g" cloud-run-service.yaml
+          sed -i "s/\${INSTANCE_NAME}/${{ env.INSTANCE_NAME }}/g" cloud-run-service.yaml
           sed -i "s/\${DB_NAME}/${{ env.DB_NAME }}/g" cloud-run-service.yaml
-          sed -i "s/\${DB_USER}/${{ env.DB_USER }}/g" cloud-run-service.yaml
           sed -i "s|\${LOKI_URL}|${{ env.LOKI_URL }}|g" cloud-run-service.yaml
 
       # 9. Déploiement sur Cloud Run

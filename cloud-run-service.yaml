@@ -3,12 +3,12 @@ kind: Service
 metadata:
   name: symfony-crud-api
   labels:
-    cloud.googleapis.com/location: europe-west1
+    cloud.googleapis.com/location: ${GCP_REGION}
 spec:
   template:
     metadata:
       annotations:
-        run.googleapis.com/cloudsql-instances: ${TR_DB_INSTANCE}
+        run.googleapis.com/cloudsql-instances: ${DB_INSTANCE}
     spec:
       containers:
         - name: symfony-app
@@ -20,6 +20,8 @@ spec:
               value: "mysql://${DB_USER}:${DB_PASSWORD}@127.0.0.1:3306/${DB_NAME}?serverVersion=8.0"
             - name: APP_ENV
               value: "prod"
+            - name: LOKI_URL
+              value: "${LOKI_URL}"
   traffic:
     - percent: 100
       latestRevision: true

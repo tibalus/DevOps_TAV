@@ -110,48 +110,36 @@ jobs:
           php bin/console doctrine:migrations:status --no-interaction
           php bin/console doctrine:migrations:migrate --no-interaction
 
-      # 8. Mise à jour du fichier de configuration Cloud Run
+      # 9. Mise à jour du fichier de configuration Cloud Run
       - name: Update Cloud Run configuration
         run: |
           sed -i "s/\${VERSION}/${{ steps.version.outputs.VERSION }}/g" cloud-run-service.yaml
-          sed -i "s/\${AG_DOCKER_USERNAME}/${{ env.AG_DOCKER_USERNAME }}/g" cloud-run-service.yaml
-          sed -i "s/\${AG_GCP_PROJECT_ID}/${{ secrets.AG_GCP_PROJECT_ID }}/g" cloud-run-service.yaml
-          sed -i "s/\${GCP_REGION}/${{ env.GCP_REGION }}/g" cloud-run-service.yaml
-          sed -i "s/\${INSTANCE_NAME}/${{ env.INSTANCE_NAME }}/g" cloud-run-service.yaml
-          sed -i "s/\${DB_NAME}/${{ env.DB_NAME }}/g" cloud-run-service.yaml
-          sed -i "s|\${LOKI_URL}|${{ env.LOKI_URL }}|g" cloud-run-service.yaml
+          sed -i "s/\${TR_DOCKER_USERNAME}/${{ secrets.TR_DOCKER_USERNAME }}/g" cloud-run-service.yaml
+          sed -i "s/\${GCP_PROJECT_ID}/${{ secrets.TR_GCP_PROJECT_ID }}/g" cloud-run-service.yaml
+          sed -i "s/\${GCP_REGION}/${{ secrets.GCP_REGION }}/g" cloud-run-service.yaml
+          sed -i "s/\${DB_INSTANCE}/${{ secrets.DB_INSTANCE }}/g" cloud-run-service.yaml
+          sed -i "s/\${DB_NAME}/${{ secrets.TR_DB_NAME }}/g" cloud-run-service.yaml
+          sed -i "s/\${DB_USER}/${{ secrets.TR_DB_USER }}/g" cloud-run-service.yaml
+          sed -i "s/\${DB_PASSWORD}/${{ secrets.TR_DB_PASSWORD }}/g" cloud-run-service.yaml
+          sed -i "s|\${LOKI_URL}|${{ secrets.TR_LOKI_URL }}|g" cloud-run-service.yaml
 
-      # Verify Cloud Run Admin API and service account roles before deployment
-      - name: Check Cloud Run Admin API is enabled
-        run: |
-          if ! gcloud services list --enabled --project="${GCP_PROJECT_ID}" | grep -q '^run.googleapis.com$'; then
-            echo "::error::Cloud Run Admin API is not enabled for project ${GCP_PROJECT_ID}. Please enable it: gcloud services enable run.googleapis.com --project=${GCP_PROJECT_ID}";
-            exit 1
-          fi
-
-      - name: Check service account roles for deployment (warn only)
-        run: |
-          SA_EMAIL=$(gcloud auth list --filter=status:ACTIVE --format='value(account)')
-          echo "Active account: ${SA_EMAIL}"
-          if ! gcloud projects get-iam-policy "${GCP_PROJECT_ID}" --flatten="bindings[].members" --format="table(bindings.role, bindings.members)" | grep -q "roles/run.admin.*${SA_EMAIL}"; then
-            echo "::warning::Service account ${SA_EMAIL} does not have roles/run.admin. Please grant the role with: gcloud projects add-iam-policy-binding ${GCP_PROJECT_ID} --member=serviceAccount:${SA_EMAIL} --role=roles/run.admin"
-          fi
-
-      # 9. Déploiement sur Cloud Run
+      # 10. Déploiement sur Cloud Run
       - name: Deploy to Cloud Run
         run: |
           gcloud run services replace cloud-run-service.yaml \
-            --region=europe-west1-d
-          
-          # Configure les permissions pour autoriser les invocations non authentifiées
-          gcloud run services add-iam-policy-binding symfony-crud-api \
-            --region=europe-west1-d \
-            --member="allUsers" \
-            --role="roles/run.invoker"
+            --region=europe-west1
+
+      - name: Deploy App to Cloud Run
+        run: |
+          gcloud run deploy symfony-app \
+            --image gcr.io/${{ secrets.TR_GCP_PROJECT_ID }}/symfony-crud-api:latest \
+            --region europe-west1 \
+            --allow-unauthenticated \
+            --port 8080
 
       - name: Get service URL
         run: |
           SERVICE_URL=$(gcloud run services describe symfony-crud-api \
-            --region=europe-west1-d \
+            --region=${{ env.GCP_REGION }} \
             --format='value(status.url)')
           echo "Service deployed at: $SERVICE_URL"

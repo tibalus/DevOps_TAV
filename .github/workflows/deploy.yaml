@@ -98,6 +98,22 @@ jobs:
           sed -i "s/\${DB_NAME}/${{ env.DB_NAME }}/g" cloud-run-service.yaml
           sed -i "s|\${LOKI_URL}|${{ env.LOKI_URL }}|g" cloud-run-service.yaml
 
+      # Verify Cloud Run Admin API and service account roles before deployment
+      - name: Check Cloud Run Admin API is enabled
+        run: |
+          if ! gcloud services list --enabled --project="${GCP_PROJECT_ID}" | grep -q '^run.googleapis.com$'; then
+            echo "::error::Cloud Run Admin API is not enabled for project ${GCP_PROJECT_ID}. Please enable it: gcloud services enable run.googleapis.com --project=${GCP_PROJECT_ID}";
+            exit 1
+          fi
+
+      - name: Check service account roles for deployment (warn only)
+        run: |
+          SA_EMAIL=$(gcloud auth list --filter=status:ACTIVE --format='value(account)')
+          echo "Active account: ${SA_EMAIL}"
+          if ! gcloud projects get-iam-policy "${GCP_PROJECT_ID}" --flatten="bindings[].members" --format="table(bindings.role, bindings.members)" | grep -q "roles/run.admin.*${SA_EMAIL}"; then
+            echo "::warning::Service account ${SA_EMAIL} does not have roles/run.admin. Please grant the role with: gcloud projects add-iam-policy-binding ${GCP_PROJECT_ID} --member=serviceAccount:${SA_EMAIL} --role=roles/run.admin"
+          fi
+
       # 9. Déploiement sur Cloud Run
       - name: Deploy to Cloud Run
         run: |

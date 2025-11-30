@@ -1,22 +1,30 @@
-[SERVICE]
-    Flush        1
-    storage.path /tmp/storage/chunks
-    storage.type filesystem
-    storage.backlog.mem_limit 25M
-    Log_Level    debug
-    Parsers_File parsers.conf
-
-[INPUT]
-    Name      tail
-    Path      /app/var/logs/crud/*.log
-    Tag       app.*
-    skip_empty_lines true
-    parser   json
-
-[OUTPUT]
-    Name        loki
-    host        35.240.99.88:3100
-    Match       app.*
-    Labels      Log_type=APP, ENV=${APP_ENV}, PROJECT_NAME=${PROJECT_NAME}, service_name=${JOB_LABEL}, level=$level
-    Remove_keys timestamp
-    Auto_Kubernetes_Labels Off
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: symfony-crud-api
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        run.googleapis.com/client-name: "github-actions"
+    spec:
+      containers:
+        - image: ${AG_DOCKER_USERNAME}/symfony-crud-api:${VERSION}
+          ports:
+            - containerPort: 80
+          env:
+            - name: APP_ENV
+              value: "prod"
+            - name: DB_NAME
+              value: "api_db"
+            - name: LOKI_URL
+              value: "35.240.99.88:3100"
+            - name: INSTANCE_NAME
+              value: "${INSTANCE_NAME}"
+          resources:
+            limits:
+              memory: "512Mi"
+  traffic:
+    - percent: 100
+      latestRevision: true

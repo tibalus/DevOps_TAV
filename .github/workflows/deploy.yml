@@ -105,6 +105,7 @@ jobs:
           sed -i "s/\${DB_INSTANCE}/${{ secrets.DB_INSTANCE }}/g" cloud-run-service.yaml
           sed -i "s/\${DB_NAME}/${{ secrets.TR_DB_NAME }}/g" cloud-run-service.yaml
           sed -i "s/\${DB_USER}/${{ secrets.TR_DB_USER }}/g" cloud-run-service.yaml
+          sed -i "s/\${DB_PASSWORD}/${{ secrets.TR_DB_PASSWORD }}/g" cloud-run-service.yaml
           sed -i "s|\${LOKI_URL}|${{ secrets.TR_LOKI_URL }}|g" cloud-run-service.yaml
 
       # 10. Déploiement sur Cloud Run

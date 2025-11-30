@@ -1,0 +1,25 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: symfony-crud-api
+  labels:
+    cloud.googleapis.com/location: ${GCP_REGION}
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/cloudsql-instances: ${DB_INSTANCE}
+    spec:
+      containers:
+        - name: symfony-app
+          image: ${TR_DOCKER_USERNAME}/symfony-crud-api:${VERSION}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATABASE_URL
+              value: "mysql://${DB_USER}:${DB_PASSWORD}@127.0.0.1:3306/${DB_NAME}?serverVersion=8.0"
+            - name: APP_ENV
+              value: "prod"
+  traffic:
+    - percent: 100
+      latestRevision: true

@@ -113,12 +113,6 @@ jobs:
         run: |
           gcloud run services replace cloud-run-service.yaml \
             --region=europe-west1
-          
-          # Configure les permissions pour autoriser les invocations non authentifiées
-          gcloud run services add-iam-policy-binding symfony-crud-api \
-            --region=${{ env.GCP_REGION }} \
-            --member="allUsers" \
-            --role="roles/run.invoker"
 
       - name: Deploy App to Cloud Run
         run: |

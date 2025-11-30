@@ -12,11 +12,9 @@ env:
   INSTANCE_NAME: ${{ secrets.INSTANCE_NAME }}
   DB_NAME: ${{ secrets.AG_DB_NAME }}
   LOKI_URL: ${{ secrets.LOKI_URL }}
+  AG_APP_SECRET: ${{ secrets.AG_APP_SECRET }}
   # Optional: enable generating migrations in CI (not recommended by default)
   GENERATE_MIGRATION: 'false'
-  # Optional flags (set to 'true' if you want CI to attempt these actions)
-  AUTO_ENABLE_RUN_API: 'false'
-  AUTO_ADD_SA_RUN_ADMIN_ROLE: 'false'
 
 jobs:
   deploy:
@@ -64,26 +62,6 @@ jobs:
           project_id: ${{ secrets.AG_GCP_PROJECT_ID }}
           export_default_credentials: true
 
-      # Validate required secrets are present (fail fast with actionable message)
-      - name: Validate required secrets and env
-        run: |
-          MISSING=0
-          if [ -z "${AG_DOCKER_USERNAME:-}" ]; then echo "::error::AG_DOCKER_USERNAME is not set"; MISSING=1; fi
-          if [ -z "${GCP_PROJECT_ID:-}" ]; then echo "::error::GCP_PROJECT_ID is not set"; MISSING=1; fi
-          if [ -z "${GCP_REGION:-}" ]; then echo "::error::GCP_REGION is not set"; MISSING=1; fi
-          if [ -z "${INSTANCE_NAME:-}" ]; then echo "::error::INSTANCE_NAME is not set"; MISSING=1; fi
-          if [ -z "${DB_NAME:-}" ]; then echo "::warning::DB_NAME is not set — this may be intentional for some environments"; fi
-          if [ -z "${LOKI_URL:-}" ]; then echo "::warning::LOKI_URL is not set — logs may not ship to Loki"; fi
-          if [ "$MISSING" -ne 0 ]; then echo "::error::Missing required env/secrets. Please configure GitHub Actions repository secrets (AG_DOCKER_USERNAME, AG_GCP_PROJECT_ID, GCP_REGION, INSTANCE_NAME)"; exit 1; fi
-
-      # Attempt to enable Cloud Run Admin API if authorized and requested (dangerous: requires permissions)
-      - name: Auto enable Cloud Run API (optional)
-        if: env.AUTO_ENABLE_RUN_API == 'true'
-        run: |
-          echo "Attempting to enable Cloud Run Admin API for project ${GCP_PROJECT_ID}"
-          gcloud services enable run.googleapis.com --project="${GCP_PROJECT_ID}" || true
-          echo "Enabled run.googleapis.com"
-
       # 7. Mise en place de PHP
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -122,6 +100,7 @@ jobs:
           sed -i "s/\${DB_USER}/${{ secrets.AG_DB_USER }}/g" cloud-run-service.yaml
           sed -i "s/\${DB_PASSWORD}/${{ secrets.AG_DB_PASSWORD }}/g" cloud-run-service.yaml
           sed -i "s|\${LOKI_URL}|${{ secrets.AG_LOKI_URL }}|g" cloud-run-service.yaml
+          sed -i "s/\${APP_SECRET}/${{ secrets.AG_APP_SECRET }}/g" cloud-run-service.yaml
 
       # 10. Déploiement sur Cloud Run
       - name: Deploy to Cloud Run
@@ -135,7 +114,8 @@ jobs:
             --image gcr.io/${{ secrets.AG_GCP_PROJECT_ID }}/symfony-crud-api:latest \
             --region europe-west1 \
             --allow-unauthenticated \
-            --port 8080
+            --port 8080 \
+            --set-env-vars "APP_SECRET=${{ secrets.AG_APP_SECRET }},APP_DEBUG=false"
 
       - name: Get service URL
         run: |

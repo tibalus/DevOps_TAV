@@ -38,24 +38,29 @@ RUN mkdir -p var/cache var/log var/logs/crud && \
 # Copier la configuration nginx (sera modifiée au démarrage)
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf.template
 
-# Créer le script de démarrage
+## Create the start script
 RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
-# Utiliser le port fourni par Cloud Run (défaut: 8080)\n\
+# Use the port provided by Cloud Run (default: 8080)\n\
 export PORT=${PORT:-8080}\n\
 \n\
-# Remplacer le port dans la config nginx\n\
+# Replace the port in nginx config\n\
 sed "s/listen 80/listen ${PORT}/g" /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf\n\
 \n\
-# Vider le cache Symfony si nécessaire\n\
+# Clear and warmup Symfony cache if possible (don't crash the container if missing config)\n\
 php bin/console cache:clear --no-warmup || true\n\
-php bin/console cache:warmup || true\n\
+if [ -n "${APP_SECRET:-}" ]; then\n\
+    echo "APP_SECRET is set — warming up cache"\n\
+    php bin/console cache:warmup || true\n\
+else\n\
+    echo "APP_SECRET not set, skipping cache warmup"\n\
+fi\n\
 \n\
-# Démarrer PHP-FPM en arrière-plan\n\
+# Start PHP-FPM in background\n\
 php-fpm -D\n\
-\n\
-# Démarrer nginx en premier plan\n\
+\
+# Start nginx in foreground\n\
 exec nginx -g "daemon off;"\n\
 ' > /start.sh && chmod +x /start.sh
 

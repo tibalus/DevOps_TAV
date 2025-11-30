@@ -3,12 +3,12 @@ kind: Service
 metadata:
   name: symfony-crud-api
   labels:
-    cloud.googleapis.com/location: ${GCP_REGION}
+    cloud.googleapis.com/location: europe-west1
 spec:
   template:
     metadata:
       annotations:
-        run.googleapis.com/cloudsql-instances: ${DB_INSTANCE}
+        run.googleapis.com/cloudsql-instances: ${AG_DB_INSTANCE}
     spec:
       containers:
         - name: symfony-app

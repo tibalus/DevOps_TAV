@@ -69,7 +69,7 @@ jobs:
           project_id: ${{ secrets.TR_GCP_PROJECT_ID }}
           export_default_credentials: true
 
-      # 7. Mise en place de PHP
+      # 7. Mise en place de PHP oui
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:

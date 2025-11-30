@@ -2,29 +2,26 @@ apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: symfony-crud-api
+  labels:
+    cloud.googleapis.com/location: ${GCP_REGION}
 spec:
   template:
     metadata:
       annotations:
-        autoscaling.knative.dev/minScale: "1"
-        run.googleapis.com/client-name: "github-actions"
+        run.googleapis.com/cloudsql-instances: ${DB_INSTANCE}
     spec:
       containers:
-        - image: ${AG_DOCKER_USERNAME}/symfony-crud-api:${VERSION}
+        - name: symfony-app
+          image: ${AG_DOCKER_USERNAME}/symfony-crud-api:latest
           ports:
-            - containerPort: 80
+            - containerPort: 8080
           env:
+            - name: DATABASE_URL
+              value: "mysql://${DB_USER}:${DB_PASSWORD}@127.0.0.1:3306/${DB_NAME}?serverVersion=8.0"
             - name: APP_ENV
               value: "prod"
-            - name: DB_NAME
-              value: "api_db"
             - name: LOKI_URL
-              value: "35.240.99.88:3100"
-            - name: INSTANCE_NAME
-              value: "${INSTANCE_NAME}"
-          resources:
-            limits:
-              memory: "512Mi"
+              value: "${LOKI_URL}"
   traffic:
     - percent: 100
       latestRevision: true

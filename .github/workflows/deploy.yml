@@ -81,9 +81,20 @@ jobs:
         run: |
           cd app
           composer install -n
+          # If we're running in CI (e.g. GitHub Actions), drop the DB first to ensure a clean state
+          if [ -n "${CI:-}" ] || [ -n "${GITHUB_ACTIONS:-}" ]; then
+            php bin/console doctrine:database:drop --force --no-interaction || true
+          fi
           php bin/console doctrine:database:create --no-interaction
-          php bin/console make:migration --no-interaction
-          php bin/console doctrine:migration:migrate --no-interaction
+          # Don't automatically generate a migration in CI — migrations should be created and committed locally.
+          # Generate a migration in CI only when explicitly requested via env (e.g. GENERATE_MIGRATION=true).
+          # Use standard shell parameter expansion rather than GH Actions expression
+          if [ "${GENERATE_MIGRATION:-false}" = "true" ]; then
+            php bin/console doctrine:migrations:diff --no-interaction || true
+          fi
+          # Show migration status and then apply migrations
+          php bin/console doctrine:migrations:status --no-interaction
+          php bin/console doctrine:migrations:migrate --no-interaction
 
       # 9. Mise à jour du fichier de configuration Cloud Run
       - name: Update Cloud Run configuration

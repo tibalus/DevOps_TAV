@@ -80,21 +80,32 @@ jobs:
         run: |
           cd app
           composer install -n
+          # If we're running in CI (e.g. GitHub Actions), drop the DB first to ensure a clean state
+          if [ -n "${CI:-}" ] || [ -n "${GITHUB_ACTIONS:-}" ]; then
+            php bin/console doctrine:database:drop --force --no-interaction || true
+          fi
           php bin/console doctrine:database:create --no-interaction
-          php bin/console make:migration --no-interaction
-          php bin/console doctrine:migration:migrate --no-interaction
+          # Don't automatically generate a migration in CI — migrations should be created and committed locally.
+          # Generate a migration in CI only when explicitly requested via env (e.g. GENERATE_MIGRATION=true).
+          # Use standard shell parameter expansion rather than GH Actions expression
+          if [ "${GENERATE_MIGRATION:-false}" = "true" ]; then
+            php bin/console doctrine:migrations:diff --no-interaction || true
+          fi
+          # Show migration status and then apply migrations
+          php bin/console doctrine:migrations:status --no-interaction
+          php bin/console doctrine:migrations:migrate --no-interaction
 
       # 9. Mise à jour du fichier de configuration Cloud Run
       - name: Update Cloud Run configuration
         run: |
           sed -i "s/\${VERSION}/${{ steps.version.outputs.VERSION }}/g" cloud-run-service.yaml
-          sed -i "s/\${TR_DOCKER_USERNAME}/${{ env.TR_DOCKER_USERNAME }}/g" cloud-run-service.yaml
-          sed -i "s/\${GCP_PROJECT_ID}/${{ env.GCP_PROJECT_ID }}/g" cloud-run-service.yaml
+          sed -i "s/\${TR_DOCKER_USERNAME}/${{ secrets.TR_DOCKER_USERNAME }}/g" cloud-run-service.yaml
+          sed -i "s/\${GCP_PROJECT_ID}/${{ secrets.TR_GCP_PROJECT_ID }}/g" cloud-run-service.yaml
           sed -i "s/\${GCP_REGION}/${{ env.GCP_REGION }}/g" cloud-run-service.yaml
-          sed -i "s/\${DB_INSTANCE}/${{ env.DB_INSTANCE }}/g" cloud-run-service.yaml
-          sed -i "s/\${DB_NAME}/${{ env.DB_NAME }}/g" cloud-run-service.yaml
-          sed -i "s/\${DB_USER}/${{ env.DB_USER }}/g" cloud-run-service.yaml
-          sed -i "s|\${LOKI_URL}|${{ env.LOKI_URL }}|g" cloud-run-service.yaml
+          sed -i "s/\${DB_INSTANCE}/${{ secrets.DB_INSTANCE }}/g" cloud-run-service.yaml
+          sed -i "s/\${DB_NAME}/${{ secrets.TR_DB_NAME }}/g" cloud-run-service.yaml
+          sed -i "s/\${DB_USER}/${{ secrets.TR_DB_USER }}/g" cloud-run-service.yaml
+          sed -i "s|\${LOKI_URL}|${{ secrets.TR_LOKI_URL }}|g" cloud-run-service.yaml
 
       # 10. Déploiement sur Cloud Run
       - name: Deploy to Cloud Run
@@ -108,6 +119,20 @@ jobs:
             --member="allUsers" \
             --role="roles/run.invoker"
 
+      - name: Deploy App to Cloud Run
+        run: |
+          gcloud run deploy symfony-app \
+            --source . \
+            --region europe-west1 \
+            --allow-unauthenticated \
+            --port 8080
+      - name: Deploy FluentBit to Cloud Run
+        run: |
+          cd fluent-bit
+          gcloud run deploy fluent-bit \
+            --source . \
+            --region europe-west1 \
+            --no-allow-unauthenticated
       - name: Get service URL
         run: |
           SERVICE_URL=$(gcloud run services describe symfony-crud-api \

@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
         - name: symfony-app
-          image: ${TR_DOCKER_USERNAME}/symfony-crud-api:${VERSION}
+          image: ${TR_DOCKER_USERNAME}/symfony-crud-api:latest
           ports:
             - containerPort: 8080
           env:

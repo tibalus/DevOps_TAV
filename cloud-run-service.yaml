@@ -20,10 +20,6 @@ spec:
               value: "mysql://${DB_USER}:${DB_PASSWORD}@127.0.0.1:3306/${DB_NAME}?serverVersion=8.0"
             - name: APP_ENV
               value: "prod"
-            - name: APP_DEBUG
-              value: "false"
-            - name: APP_SECRET
-              value: "${APP_SECRET}"
             - name: LOKI_URL
               value: "${LOKI_URL}"
   traffic:

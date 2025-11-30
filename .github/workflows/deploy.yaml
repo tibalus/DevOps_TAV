@@ -12,7 +12,6 @@ env:
   INSTANCE_NAME: ${{ secrets.INSTANCE_NAME }}
   DB_NAME: ${{ secrets.AG_DB_NAME }}
   LOKI_URL: ${{ secrets.LOKI_URL }}
-  AG_APP_SECRET: ${{ secrets.AG_APP_SECRET }}
   # Optional: enable generating migrations in CI (not recommended by default)
   GENERATE_MIGRATION: 'false'
 
@@ -100,7 +99,6 @@ jobs:
           sed -i "s/\${DB_USER}/${{ secrets.AG_DB_USER }}/g" cloud-run-service.yaml
           sed -i "s/\${DB_PASSWORD}/${{ secrets.AG_DB_PASSWORD }}/g" cloud-run-service.yaml
           sed -i "s|\${LOKI_URL}|${{ secrets.AG_LOKI_URL }}|g" cloud-run-service.yaml
-          sed -i "s/\${APP_SECRET}/${{ secrets.AG_APP_SECRET }}/g" cloud-run-service.yaml
 
       # 10. Déploiement sur Cloud Run
       - name: Deploy to Cloud Run
@@ -114,8 +112,7 @@ jobs:
             --image gcr.io/${{ secrets.AG_GCP_PROJECT_ID }}/symfony-crud-api:latest \
             --region europe-west1 \
             --allow-unauthenticated \
-            --port 8080 \
-            --set-env-vars "APP_SECRET=${{ secrets.AG_APP_SECRET }},APP_DEBUG=false"
+            --port 8080
 
       - name: Get service URL
         run: |

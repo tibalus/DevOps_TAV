@@ -117,17 +117,11 @@ jobs:
       - name: Deploy App to Cloud Run
         run: |
           gcloud run deploy symfony-app \
-            --source . \
+            --image gcr.io/${{ secrets.TR_GCP_PROJECT_ID }}/symfony-crud-api:${{ steps.version.outputs.VERSION }} \
             --region europe-west1 \
             --allow-unauthenticated \
             --port 8080
-      - name: Deploy FluentBit to Cloud Run
-        run: |
-          cd fluent-bit
-          gcloud run deploy fluent-bit \
-            --source . \
-            --region europe-west1 \
-            --no-allow-unauthenticated
+
       - name: Get service URL
         run: |
           SERVICE_URL=$(gcloud run services describe symfony-crud-api \

@@ -117,10 +117,11 @@ jobs:
       - name: Deploy App to Cloud Run
         run: |
           gcloud run deploy symfony-app \
-            --image gcr.io/${{ secrets.TR_DOCKER_USERNAME }}/symfony-crud-api:latest \
+            --image tibal2/symfony-crud-api:latest \
             --region europe-west1 \
             --allow-unauthenticated \
-            --port 8080
+            --port 8080 \
+            --platform managed
 
       - name: Get service URL
         run: |

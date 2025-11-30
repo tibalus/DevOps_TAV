@@ -12,12 +12,12 @@ spec:
     spec:
       containers:
         - name: symfony-app
-          image: ${TR_DOCKER_USERNAME}/symfony-crud-api:latest
+          image: tibal2/symfony-crud-api:latest
           ports:
             - containerPort: 8080
           env:
             - name: DATABASE_URL
-              value: "mysql://${DB_USER}:${DB_PASSWORD}@127.0.0.1:3306/${DB_NAME}?serverVersion=8.0"
+              value: "mysql://${DB_USER}:${DB_PASSWORD}@127.0.0.1:3306/api_db?serverVersion=8.0"
             - name: APP_ENV
               value: "prod"
             - name: LOKI_URL

@@ -101,7 +101,7 @@ jobs:
           sed -i "s/\${VERSION}/${{ steps.version.outputs.VERSION }}/g" cloud-run-service.yaml
           sed -i "s/\${TR_DOCKER_USERNAME}/${{ secrets.TR_DOCKER_USERNAME }}/g" cloud-run-service.yaml
           sed -i "s/\${GCP_PROJECT_ID}/${{ secrets.TR_GCP_PROJECT_ID }}/g" cloud-run-service.yaml
-          sed -i "s/\${GCP_REGION}/${{ env.GCP_REGION }}/g" cloud-run-service.yaml
+          sed -i "s/\${GCP_REGION}/${{ secrets.GCP_REGION }}/g" cloud-run-service.yaml
           sed -i "s/\${DB_INSTANCE}/${{ secrets.DB_INSTANCE }}/g" cloud-run-service.yaml
           sed -i "s/\${DB_NAME}/${{ secrets.TR_DB_NAME }}/g" cloud-run-service.yaml
           sed -i "s/\${DB_USER}/${{ secrets.TR_DB_USER }}/g" cloud-run-service.yaml

@@ -46,7 +46,8 @@ set -e\n\
 export PORT=${PORT:-8080}\n\
 \n\
 # Remplacer le port dans la config nginx\n\
-sed "s/listen 80/listen ${PORT}/g" /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf\n\
+sed -i "s/listen [0-9]*;/listen ${PORT};/g" /etc/nginx/conf.d/default.conf.template\n\
+cp /etc/nginx/conf.d/default.conf.template /etc/nginx/conf.d/default.conf\n\
 \n\
 # Vider le cache Symfony si nécessaire\n\
 php bin/console cache:clear --no-warmup || true\n\

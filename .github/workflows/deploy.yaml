@@ -70,6 +70,7 @@ jobs:
         run: |
           cd app
           composer install -n
+          php bin/console doctrine:database:drop --no-interaction
           php bin/console doctrine:database:create --no-interaction
           php bin/console make:migration --no-interaction
           php bin/console doctrine:migration:migrate --no-interaction

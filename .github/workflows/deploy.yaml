@@ -70,7 +70,10 @@ jobs:
         run: |
           cd app
           composer install -n
-          php bin/console doctrine:database:drop --force --no-interaction
+          # If we're running in CI (e.g. GitHub Actions), drop the DB first to ensure a clean state
+          if [ -n "${CI:-}" ] || [ -n "${GITHUB_ACTIONS:-}" ]; then
+            php bin/console doctrine:database:drop --force --no-interaction || true
+          fi
           php bin/console doctrine:database:create --no-interaction
           php bin/console make:migration --no-interaction
           php bin/console doctrine:migration:migrate --no-interaction
